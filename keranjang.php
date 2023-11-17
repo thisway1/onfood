@@ -93,103 +93,92 @@
 
         <div class="container">
             <div class="row">
-                <table class="table table-bordered text-center">
-                    <thead>
-                        <tr>
-                            <th>Food Images</th>
-                            <th>Food Title</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Check</th>
-                            <th colspan="2">Option</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!--PHP Line Code Dynamic-->
-                        <?php
-                            $getIp = getIPAddress();
-                            $total_harga=0;
-                            $getKeranjang_q = "SELECT * FROM `tbl_keranjang_detail` WHERE ip_address='$getIp'";
-                            $res_q = mysqli_query($conn,$getKeranjang_q);
+                <form action="" method="post">
+                    <table class="table table-bordered text-center">
+                        <thead>
+                            <tr>
+                                <th>Food Images</th>
+                                <th>Food Title</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Check</th>
+                                <th colspan="2">Option</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!--PHP Line Code Dynamic-->
+                            <?php
+                                $getIp = getIPAddress();
+                                $total_harga=0;
+                                $getKeranjang_q = "SELECT * FROM `tbl_keranjang_detail` WHERE   ip_address='$getIp'";
+                                $res_q = mysqli_query($conn,$getKeranjang_q);
                                 
-                            while($row=mysqli_fetch_array($res_q)){
-                                $food_id=$row['food_id'];
-                                $select_food = "SELECT * FROM `tbl_food` WHERE food_id='$food_id'";
-                                $resFood_q = mysqli_query($conn,$select_food);
+                                while($row=mysqli_fetch_array($res_q)){
+                                    $food_id=$row['food_id'];
+                                    $select_food = "SELECT * FROM `tbl_food` WHERE  food_id='$food_id'";
+                                    $resFood_q = mysqli_query($conn,$select_food);
                         
-                                while($rowFoodprice=mysqli_fetch_array($resFood_q)){
-                                    $price=array($rowFoodprice['price']);
-                                    $tabel_price=$rowFoodprice['price'];
-                                    $food_title=$rowFoodprice['food_title'];
-                                    $food_img=$rowFoodprice['food_img'];
-                                    $price_value=array_sum($price);
-                                    $total_harga += $price_value;
-                        ?>
-                        <tr>
-                            <td><img class="img_keranjang" src="../images/<?php echo $food_img?>" alt=""></td>
-                            <!--Tabel nama makanan-->
-                            <td>
+                                    while($rowFoodprice=mysqli_fetch_array($resFood_q)){
+                                        $price=array($rowFoodprice['price']);
+                                        $tabel_price=$rowFoodprice['price'];
+                                        $food_title=$rowFoodprice['food_title'];
+                                        $food_img=$rowFoodprice['food_img'];
+                                        $price_value=array_sum($price);
+                                        $total_harga += $price_value;
+                            ?>
+                            <tr>
+                                <td><img class="img_keranjang" src="../images/<?php echo $food_img?>" alt=""></td>
+                                <!--Tabel nama makanan-->
+                                <td>
+                                    <?php
+                                        echo $food_title;
+                                    ?>
+                                </td>
+                                <!--Form kuantitas-->
+                                <td>
+                                    <input type="text" name="qty" class="form-input w-50">
+                                </td>
                                 <?php
-                                    echo $food_title;
+                                    $getIp = getIPAddress();
+                                    if(isset($_POST['update_item'])){
+                                        $quantities=$_POST['qty'];
+                                        $update_item_="UPDATE `tbl_keranjang_detail` SET quantity=$quantities WHERE ip_address='$getIp'";
+                                        $res_updateQty = mysqli_query($conn,$update_item_);
+                                        $total_harga=$total_harga*$quantities;
+                                    }
                                 ?>
-                            </td>
-                            <!--Form kuantitas-->
-<td>
-    <input type="text" name="qty" class="form-input w-50">
-</td>
-<?php
-    $getIp = getIPAddress();
-    
-    if(isset($_POST['update_item'])){
-        // Validate Quantity
-        if(isset($_POST['qty']) && is_numeric($_POST['qty']) && $_POST['qty'] > 0) {
-            $quantities = $_POST['qty'];
-            
-            // Update Quantity in Database
-            $update_item_ = "UPDATE `tbl_keranjang_detail` SET quantity=$quantities WHERE ip_address='$getIp'";
-            $res_updateQty = mysqli_query($conn, $update_item_);
-            
-            if(!$res_updateQty) {
-                echo "Error updating quantity: " . mysqli_error($conn);
-            } else {
-                $total_harga = $total_harga * $quantities;
-            }
-        } else {
-            echo "Error: Invalid quantity input. Please enter a valid number greater than 0.";
-        }
-    }
-?>
-
-                            <td>
-                                <?php
-                                    echo $tabel_price;
-                                ?>
-                            </td>
-                            <td><input type="checkbox"></td>
-                            <td>
-                                <input type="submit" value="Update Item" class="btn btn-yellow mx-3" name="update_item">
-                                <!--input type="submit" name="remove_keranjang" class="btn btn-yellow" value="Remove Item"-->
-                            </td>
-                        </tr>
-                        <?php
+                                <td>
+                                    <?php
+                                        echo $tabel_price;
+                                    ?>
+                                </td>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <input type="submit" value="Update Item" class="btn btn-yellow mx-3" name="update_item">
+                                    <!--input type="submit" name="remove_keranjang" class="btn btn-yellow" value="Remove Item"-->
+                                </td>
+                            </tr>
+                            <?php
+                                    }
                                 }
-                            }
-                        ?>
-                    </tbody>
-                </table>
-                <div class="d-flex mb-5">
-                    <h4 class="px-2">
-                        <strong class="text-black">Total : <?php echo $total_harga?></strong>
-                    </h4>
-                    <a href="menu.php">
-                        <button class="btn btn-yellow mx-2">Lanjut Belanja</button>
-                    </a>
-                    <a href="#">
-                        <button class="btn btn-yellow mx-2">Check Out</button>
-                    </a>
-                </div>
+                            ?>
+                        </tbody>
+                    </table>
+                    <div class="d-flex mb-5">
+                        <h4 class="px-2">
+                            <strong class="text-black">Total : <?php echo $total_harga?></strong>
+                        </h4>
+                        <a href="menu.php">
+                            <button class="btn btn-yellow mx-2">Lanjut Belanja</button>
+                        </a>
+                        <a href="#">
+                            <button class="btn btn-yellow mx-2">Check Out</button>
+                        </a>
+                    </div>
+                </form>            
             </div>
         </div>
+        
         <!--Footer-->
         <?php include("includes/footer.php")?>
     </div>
